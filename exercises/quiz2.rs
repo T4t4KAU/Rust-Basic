@@ -1,64 +1,78 @@
-// quiz2.rs
+// This quiz tests:
+// - Generics
+// - Traits
 //
-// This is a quiz for the following sections:
-// - Strings
-// - Vecs
-// - Move semantics
-// - Modules
-// - Enums
+// An imaginary magical school has a new report card generation system written
+// in Rust! Currently, the system only supports creating report cards where the
+// student's grade is represented numerically (e.g. 1.0 -> 5.5). However, the
+// school also issues alphabetical grades (A+ -> F-) and needs to be able to
+// print both types of report card!
 //
-// Let's build a little machine in the form of a function. As input, we're going
-// to give a list of strings and commands. These commands determine what action
-// is going to be applied to the string. It can either be:
-// - Uppercase the string
-// - Trim the string
-// - Append "bar" to the string a specified amount of times
-// The exact form of this will be:
-// - The input is going to be a Vector of a 2-length tuple,
-//   the first element is the string, the second one is the command.
-// - The output element is going to be a Vector of strings.
-//
-// No hints this time!
+// Make the necessary code changes in the struct `ReportCard` and the impl
+// block to support alphabetical report cards in addition to numerical ones.
 
-// I AM NOT DONE
-
-pub enum Command {
-    Uppercase,
-    Trim,
-    Append(usize),
+struct ReportCard<T: Grade> {
+    pub grade: T,
+    pub student_name: String,
+    pub student_age: u8,
 }
 
-mod my_module {
-    use super::Command;
+pub trait Grade {
+    fn print_grade(&self)->String;
+}
 
-    // TODO: Complete the function signature!
-    pub fn transformer(input: ???) -> ??? {
-        // TODO: Complete the output declaration!
-        let mut output: ??? = vec![];
-        for (string, command) in input.iter() {
-            // TODO: Complete the function body. You can do it!
-        }
-        output
+impl Grade for f32 {
+    fn print_grade(&self) -> String {
+        format!("{}", self)
     }
+}
+
+impl Grade for &'static str {
+    fn print_grade(&self) -> String {
+        self.to_string()
+    }
+}
+
+impl<T: Grade> ReportCard<T> {
+    fn print(&self) -> String {
+        format!(
+            "{} ({}) - achieved a grade of {}",
+            &self.student_name, &self.student_age, &self.grade.print_grade(),
+        )
+    }
+}
+
+fn main() {
+    // You can optionally experiment here.
 }
 
 #[cfg(test)]
 mod tests {
-    // TODO: What do we need to import to have `transformer` in scope?
-    use ???;
-    use super::Command;
+    use super::*;
 
     #[test]
-    fn it_works() {
-        let output = transformer(vec![
-            ("hello".into(), Command::Uppercase),
-            (" all roads lead to rome! ".into(), Command::Trim),
-            ("foo".into(), Command::Append(1)),
-            ("bar".into(), Command::Append(5)),
-        ]);
-        assert_eq!(output[0], "HELLO");
-        assert_eq!(output[1], "all roads lead to rome!");
-        assert_eq!(output[2], "foobar");
-        assert_eq!(output[3], "barbarbarbarbarbar");
+    fn generate_numeric_report_card() {
+        let report_card = ReportCard {
+            grade: 2.1,
+            student_name: "Tom Wriggle".to_string(),
+            student_age: 12,
+        };
+        assert_eq!(
+            report_card.print(),
+            "Tom Wriggle (12) - achieved a grade of 2.1",
+        );
+    }
+
+    #[test]
+    fn generate_alphabetic_report_card() {
+        let report_card = ReportCard {
+            grade: "A+",
+            student_name: "Gary Plotter".to_string(),
+            student_age: 11,
+        };
+        assert_eq!(
+            report_card.print(),
+            "Gary Plotter (11) - achieved a grade of A+",
+        );
     }
 }
